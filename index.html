@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MiniFun City</title>
-    <meta> name="description" content="Some small HTML5/JS (ES6) web apps for fun">
+    <meta name="description" content="Some small HTML5/JS (ES6) web apps for fun">
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body id="index-body">
@@ -25,7 +25,56 @@
         <a href="typing.html" class="nav-button">Typing Test</a>
         <a href="clock.html" class="nav-button">Clock</a>
         <a href="la-quiz.html" class="nav-button">Final ELA Quiz</a>
-        <a href="https://github.com/linuxuser237/minifuncity" class="nav-button" target="_blank">GitHub Repo</a>
+                <a href="https://github.com/linuxuser237/minifuncity" class="nav-button" id="githubLink" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
     </div>
+        <!-- External link confirmation modal -->
+        <div id="externalConfirm" aria-hidden="true">
+            <div class="modal">
+                <div class="modal-text">This is the foundation for this website. You can view all of the code files here! Do you want to visit this page?</div>
+                <div class="modal-actions">
+                    <button class="btn cancel" id="extNo">No, I want to stay</button>
+                    <button class="btn confirm" id="extYes">Yes</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function(){
+                const link = document.getElementById('githubLink');
+                const modal = document.getElementById('externalConfirm');
+                const yes = document.getElementById('extYes');
+                const no = document.getElementById('extNo');
+
+                if(!link || !modal || !yes || !no) return;
+
+                link.addEventListener('click', function(e){
+                    e.preventDefault();
+                    modal.dataset.href = this.href;
+                    modal.setAttribute('aria-hidden', 'false');
+                    modal.classList.add('open');
+                });
+
+                yes.addEventListener('click', function(){
+                    const href = modal.dataset.href;
+                    modal.classList.remove('open');
+                    modal.setAttribute('aria-hidden','true');
+                    // open in a new tab safely
+                    window.open(href, '_blank', 'noopener');
+                });
+
+                no.addEventListener('click', function(){
+                    modal.classList.remove('open');
+                    modal.setAttribute('aria-hidden','true');
+                });
+
+                // close modal on Escape
+                document.addEventListener('keydown', function(e){
+                    if(e.key === 'Escape' && modal.classList.contains('open')){
+                        modal.classList.remove('open');
+                        modal.setAttribute('aria-hidden','true');
+                    }
+                });
+            })();
+        </script>
 </body>
 </html>

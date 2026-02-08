@@ -399,3 +399,13 @@ canvas {
   padding: 10px 20px;
   cursor: pointer;
 }
+
+/* External link confirmation modal */
+#externalConfirm{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:9999}
+#externalConfirm.open{display:flex}
+#externalConfirm .modal{background:white;color:#042a66;padding:18px;border-radius:10px;max-width:420px;text-align:left;box-shadow:0 6px 30px rgba(2,6,23,0.3)}
+#externalConfirm .modal-text{margin-bottom:12px}
+#externalConfirm .modal-actions{display:flex;gap:8px;justify-content:flex-end}
+#externalConfirm .btn{padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+#externalConfirm .btn.cancel{background:#e0e7ff;color:#042a66}
+#externalConfirm .btn.confirm{background:#1565c0;color:white}
