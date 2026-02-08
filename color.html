@@ -8,74 +8,205 @@
 </head>
 <body id="color-body">
     <h1>Color Guess Game!</h1>
-    <div id="colorBox"></div>
-    <p id="clues"></p>
-    <div id="buttons"></div>
-    <h2>Score: <span id="score">0</span></h2>
-    <h2 id="message"></h2>
+
+    <div class="controls" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <label>Mode:
+            <select id="mode">
+                <option value="classic">Classic (name/clues)</option>
+                <option value="hex">Hex code</option>
+                <option value="rgb">RGB value</option>
+                <option value="blind">Blind (no clues)</option>
+                <option value="time">Time Attack</option>
+            </select>
+        </label>
+        <label>Difficulty:
+            <select id="difficulty">
+                <option value="easy">Easy (3 choices)</option>
+                <option value="normal">Normal (4 choices)</option>
+                <option value="hard">Hard (6 choices)</option>
+            </select>
+        </label>
+        <button id="startBtn">Start</button>
+        <div style="margin-left:auto">Lives: <span id="lives">3</span> • Score: <span id="score">0</span> • Time: <span id="timer">--</span></div>
+    </div>
+
+    <div id="colorBox" style="width:180px;height:120px;border-radius:8px;border:2px solid #ddd;margin-bottom:10px"></div>
+    <p id="clues" style="min-height:30px;margin:0 0 8px 0"></p>
+    <div id="buttons" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px"></div>
+    <h2 id="message" style="min-height:30px"></h2>
 
     <script>
+        // Larger color set with hex and short clue
         const colors = [
-            {name: "red", clue1: "R", clue2: "warm color"},
-            {name: "green", clue1: "G", clue2: "nature color"},
-            {name: "blue", clue1: "B", clue2: "cool color"},
-            {name: "yellow", clue1: "Y", clue2: "bright color"},
-            {name: "purple", clue1: "P", clue2: "royal color"},
-            {name: "orange", clue1: "O", clue2: "sunset color"},
-            {name: "pink", clue1: "P", clue2: "cute color"},
-            {name: "cyan", clue1: "C", clue2: "sky color"}
+            {name: 'AliceBlue', hex:'#F0F8FF', clue: 'light, airy'},
+            {name: 'AntiqueWhite', hex:'#FAEBD7', clue: 'soft cream'},
+            {name: 'Aqua', hex:'#00FFFF', clue: 'cyan, watery'},
+            {name: 'Aquamarine', hex:'#7FFFD4', clue: 'sea green shade'},
+            {name: 'Azure', hex:'#F0FFFF', clue: 'very pale blue'},
+            {name: 'Beige', hex:'#F5F5DC', clue: 'neutral tan'},
+            {name: 'Coral', hex:'#FF7F50', clue: 'pink-orange'},
+            {name: 'Crimson', hex:'#DC143C', clue: 'deep red'},
+            {name: 'DarkCyan', hex:'#008B8B', clue: 'deep teal'},
+            {name: 'DarkGoldenRod', hex:'#B8860B', clue: 'mustard/gold'},
+            {name: 'DarkMagenta', hex:'#8B008B', clue: 'purple-magenta'},
+            {name: 'DodgerBlue', hex:'#1E90FF', clue: 'bright blue'},
+            {name: 'Gold', hex:'#FFD700', clue: 'bright gold'},
+            {name: 'HotPink', hex:'#FF69B4', clue: 'hot pink'},
+            {name: 'Indigo', hex:'#4B0082', clue: 'deep indigo'},
+            {name: 'Lime', hex:'#00FF00', clue: 'bright green'},
+            {name: 'LimeGreen', hex:'#32CD32', clue: 'fresh green'},
+            {name: 'Maroon', hex:'#800000', clue: 'brownish red'},
+            {name: 'MediumSeaGreen', hex:'#3CB371', clue: 'sea green'},
+            {name: 'NavajoWhite', hex:'#FFDEAD', clue: 'light tan'},
+            {name: 'Olive', hex:'#808000', clue: 'army green'},
+            {name: 'OrangeRed', hex:'#FF4500', clue: 'fiery orange'},
+            {name: 'Orchid', hex:'#DA70D6', clue: 'soft purple'},
+            {name: 'Peru', hex:'#CD853F', clue: 'warm brown'},
+            {name: 'Plum', hex:'#DDA0DD', clue: 'muted purple'},
+            {name: 'RoyalBlue', hex:'#4169E1', clue: 'royal blue'},
+            {name: 'Sienna', hex:'#A0522D', clue: 'rust brown'},
+            {name: 'SkyBlue', hex:'#87CEEB', clue: 'sky shade'},
+            {name: 'SlateGray', hex:'#708090', clue: 'muted gray-blue'},
+            {name: 'Tomato', hex:'#FF6347', clue: 'tomato red'},
+            {name: 'Turquoise', hex:'#40E0D0', clue: 'tropical teal'},
+            {name: 'Violet', hex:'#EE82EE', clue: 'bright violet'},
+            {name: 'Wheat', hex:'#F5DEB3', clue: 'pale wheat'},
+            {name: 'YellowGreen', hex:'#9ACD32', clue: 'spring green'}
         ];
 
-        let score = 0;
-        let correctColor = {};
-        const colorBox = document.getElementById('colorBox');
-
-        function newRound(){
-            correctColor = colors[Math.floor(Math.random() * colors.length)];
-
-            // hide colorBox for new round
-            colorBox.style.display = 'none';
-
-            // show clues only
-            document.getElementById('clues').innerText = `Clues: ${correctColor.clue1}, ${correctColor.clue2}`;
-
-            // pick 2 random other colors for buttons
-            let choices = [correctColor.name];
-            while(choices.length < 3){
-                let c = colors[Math.floor(Math.random() * colors.length)].name;
-                if(!choices.includes(c)) choices.push(c);
-            }
-            // shuffle choices
-            choices.sort(() => Math.random() - 0.5);
-
-            const buttonsDiv = document.getElementById('buttons');
-            buttonsDiv.innerHTML = "";
-            choices.forEach(c => {
-                const btn = document.createElement('button');
-                btn.innerText = c;
-                btn.onclick = () => checkGuess(c);
-                buttonsDiv.appendChild(btn);
-            });
-            document.getElementById('message').innerText = "";
+        // helpers
+        const $ = id => document.getElementById(id);
+        function hexToRgb(hex){
+            const h = hex.replace('#','');
+            const r = parseInt(h.substring(0,2),16);
+            const g = parseInt(h.substring(2,4),16);
+            const b = parseInt(h.substring(4,6),16);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        function textColorFor(hex){
+            const h = hex.replace('#','');
+            const r = parseInt(h.substring(0,2),16);
+            const g = parseInt(h.substring(2,4),16);
+            const b = parseInt(h.substring(4,6),16);
+            // luminance
+            const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+            return lum > 140 ? '#000' : '#fff';
         }
 
-        function checkGuess(color){
-            // show the color block
-            colorBox.style.backgroundColor = correctColor.name;
-            colorBox.style.display = 'block';
+        let score = 0, lives = 3, timerId = null, remaining = 0;
+        let correct = null;
 
-            if(color === correctColor.name){
-                score++;
-                document.getElementById('message').innerText = "🎉 Correct!";
-            } else {
-                document.getElementById('message').innerText = "❌ Wrong!";
+        function getChoiceCount(){
+            const d = $('difficulty').value;
+            return d === 'easy' ? 3 : d === 'normal' ? 4 : 6;
+        }
+
+        function startGame(){
+            score = 0; lives = 3; $('score').textContent = score; $('lives').textContent = lives; $('message').textContent = '';
+            newRound();
+        }
+
+        function newRound(){
+            clearTimer();
+            const mode = $('mode').value;
+            const count = getChoiceCount();
+            // pick correct
+            correct = colors[Math.floor(Math.random()*colors.length)];
+
+            // hide color box until reveal
+            $('colorBox').style.backgroundColor = '#ffffff';
+
+            // set clues
+            if(mode === 'classic'){
+                $('clues').innerText = `Clue: ${correct.clue} (initial: ${correct.name[0]})`;
+            } else if(mode === 'hex'){
+                $('clues').innerText = `Hex: ${correct.hex}`;
+            } else if(mode === 'rgb'){
+                $('clues').innerText = `RGB: ${hexToRgb(correct.hex)}`;
+            } else if(mode === 'blind'){
+                $('clues').innerText = `(No clues)`;
+            } else if(mode === 'time'){
+                $('clues').innerText = `Find the color quickly!`;
+                startTimer(10); // 10 seconds per round
             }
-            document.getElementById('score').innerText = score;
 
-            // wait a bit before new round
+            // build choices
+            const choices = new Set([correct.name]);
+            while(choices.size < count){
+                choices.add(colors[Math.floor(Math.random()*colors.length)].name);
+            }
+            const arr = Array.from(choices).sort(() => Math.random() - 0.5);
+
+            const buttons = $('buttons');
+            buttons.innerHTML = '';
+            const hideLabels = ($('difficulty').value === 'hard');
+
+            arr.forEach(name => {
+                const colorObj = colors.find(c => c.name === name);
+                const btn = document.createElement('button');
+                btn.className = 'color-swatch';
+                btn.style.padding = '10px';
+                btn.style.borderRadius = '8px';
+                btn.style.border = '1px solid #ccc';
+                btn.style.background = colorObj.hex;
+                btn.style.color = textColorFor(colorObj.hex);
+                btn.style.cursor = 'pointer';
+                if(!hideLabels) btn.innerText = colorObj.name;
+                btn.onclick = () => checkGuess(colorObj.name);
+                buttons.appendChild(btn);
+            });
+        }
+
+        function revealAndPenalize(wrong){
+            $('colorBox').style.backgroundColor = correct.hex;
+            if(!wrong) $('message').innerText = '🎉 Correct!';
+            else $('message').innerText = `❌ Wrong! It was ${correct.name}`;
+            $('score').textContent = score;
+            $('lives').textContent = lives;
+        }
+
+        function checkGuess(name){
+            clearTimer();
+            if(name === correct.name){
+                score += 10;
+                $('score').textContent = score;
+                revealAndPenalize(false);
+            } else {
+                lives -= 1;
+                revealAndPenalize(true);
+            }
+
+            if(lives <= 0){
+                $('message').innerText += ' — Game Over';
+                $('buttons').innerHTML = '';
+                return;
+            }
             setTimeout(newRound, 1200);
         }
 
+        function startTimer(seconds){
+            remaining = seconds;
+            $('timer').textContent = remaining + 's';
+            timerId = setInterval(() => {
+                remaining -= 1;
+                $('timer').textContent = remaining + 's';
+                if(remaining <= 0){
+                    clearTimer();
+                    lives -= 1;
+                    revealAndPenalize(true);
+                    if(lives <= 0){ $('message').innerText += ' — Game Over'; $('buttons').innerHTML = ''; return; }
+                    setTimeout(newRound, 1000);
+                }
+            }, 1000);
+        }
+        function clearTimer(){ if(timerId) { clearInterval(timerId); timerId = null; $('timer').textContent = '--'; } }
+
+        // wire controls
+        $('startBtn').addEventListener('click', startGame);
+        $('mode').addEventListener('change', () => { clearTimer(); newRound(); });
+        $('difficulty').addEventListener('change', () => newRound());
+
+        // start with an initial round
         newRound();
     </script>
 </body>

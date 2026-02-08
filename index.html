@@ -1,79 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>MiniFun City</title>
-    <meta name="description" content="Some small HTML5/JS (ES6) web apps for fun">
+    <meta name="description" content="A collection of small HTML5/JS web apps and games.">
     <link href="style.css" rel="stylesheet" type="text/css">
+    <style>
+        :root{--card-bg:#ffffff;--accent:#0b66c2;--muted:#234566}
+        header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .logo{font-weight:700;font-size:20px;color:var(--accent)}
+        .subtitle{color:var(--muted);font-size:14px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:18px}
+        .card{background:var(--card-bg);padding:12px;border-radius:10px;border:1px solid rgba(11,102,194,0.08);box-shadow:0 6px 18px rgba(11,102,194,0.04);transition:transform .18s ease,box-shadow .18s ease}
+        .card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 12px 30px rgba(11,102,194,0.12)}
+        .card h3{margin:0 0 6px 0}
+        .card p{margin:0;font-size:13px;color:#445}
+        .card small{display:block;margin-top:8px;color:#6a7f9a}
+        .footer{margin-top:20px;color:#556;display:flex;gap:12px;align-items:center}
+        .external-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);opacity:0;pointer-events:none;transition:opacity .18s}
+        .external-modal.open{opacity:1;pointer-events:auto}
+        .external-modal .box{background:white;padding:18px;border-radius:10px;max-width:520px;box-shadow:0 20px 60px rgba(2,6,23,0.4)}
+        .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+        a.card-link{color:inherit;text-decoration:none}
+    </style>
 </head>
 <body id="index-body">
-    <h1>Welcome to MiniFun City!</h1>
-    <h2>About MiniFun City
-        <br>
-        A fun project of small web apps built with HTML5, CSS, and JavaScript (ES6).
-    </h2>
-    <h3>Maintained and updated independently by a single developer!</h3>
-    <div class="button-container">
-        <a href="calculator.html" class="nav-button">Calculator</a>
-        <a href="game.html" class="nav-button">Guess the Number</a>
-        <a href="memory.html" class="nav-button">Memory Game</a>
-        <a href="color.html" class="nav-button">Color Guess</a>
-        <a href="math.html" class="nav-button">Math Practice</a>
-        <a href="lang-arts.html" class="nav-button">Language Arts Practice</a>
-        <a href="maze.html" class="nav-button">Mini Maze</a>
-        <a href="typing.html" class="nav-button">Typing Test</a>
-        <a href="clock.html" class="nav-button">Clock</a>
-        <a href="la-quiz.html" class="nav-button">Final ELA Quiz</a>
-                <a href="https://github.com/linuxuser237/minifuncity" class="nav-button" id="githubLink" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+    <header>
+        <div>
+            <div class="logo">MiniFun City</div>
+            <div class="subtitle">Small web apps and games — HTML5, CSS, JavaScript</div>
+        </div>
+        <nav style="margin-left:auto">
+            <a href="https://github.com/linuxuser237/minifuncity" class="nav-link" data-external>View Source</a>
+            <a href="#about" style="margin-left:12px">About</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="grid" aria-label="Apps and games">
+            <a class="card-link" href="calculator.html"><article class="card"><h3>Calculator</h3><p>Modern calculator with basic and scientific functions.</p><small>Keyboard supported</small></article></a>
+            <a class="card-link" href="game.html"><article class="card"><h3>Guess the Number</h3><p>New rewrite: modes, difficulty, time attack and scoring.</p><small>Local high scores</small></article></a>
+            <a class="card-link" href="memory.html"><article class="card"><h3>Memory Game</h3><p>Flip cards and find pairs.</p></article></a>
+            <a class="card-link" href="color.html"><article class="card"><h3>Color Guess</h3><p>Multiple modes: name, hex, RGB, and time attack.</p></article></a>
+            <a class="card-link" href="math.html"><article class="card"><h3>Math Practice</h3><p>Timed exercises for arithmetic.</p></article></a>
+            <a class="card-link" href="lang-arts.html"><article class="card"><h3>Language Arts</h3><p>Reading and vocabulary practice.</p></article></a>
+            <a class="card-link" href="maze.html"><article class="card"><h3>Mini Maze</h3><p>Navigate the maze and reach the exit.</p></article></a>
+            <a class="card-link" href="typing.html"><article class="card"><h3>Typing Test</h3><p>Measure your WPM and accuracy.</p></article></a>
+            <a class="card-link" href="clock.html"><article class="card"><h3>Clock</h3><p>Themed clock with vaporwave visuals.</p></article></a>
+            <a class="card-link" href="la-quiz.html"><article class="card"><h3>ELA Quiz</h3><p>Final exam style questions and review.</p></article></a>
+            <a class="card-link" href="rps.html"><article class="card"><h3>Rock Paper Scissors</h3><p>Classic hand game vs computer.</p></article></a>
+        </section>
+
+        <section id="about" style="margin-top:18px">
+            <h2>About MiniFun City</h2>
+            <p>A collection of educational and fun micro-apps built with simple technologies. Contributions welcome — the source is available on GitHub.</p>
+        </section>
+    </main>
+
+    <div class="footer">
+        <div>Made with ❤️ — small, fast, local-first.</div>
     </div>
-        <!-- External link confirmation modal -->
-        <div id="externalConfirm" aria-hidden="true">
-            <div class="modal">
-                <div class="modal-text">This is the foundation for this website. You can view all of the code files here! Do you want to visit this page?</div>
-                <div class="modal-actions">
-                    <button class="btn cancel" id="extNo">No, I want to stay</button>
-                    <button class="btn confirm" id="extYes">Yes</button>
-                </div>
+
+    <div id="externalModal" class="external-modal" aria-hidden="true">
+        <div class="box">
+            <div id="externalText">You are leaving MiniFun City and visiting an external site. Continue?</div>
+            <div class="modal-actions">
+                <button id="externalCancel" class="btn" style="background:#ef5350">Stay</button>
+                <button id="externalOpen" class="btn">Open</button>
             </div>
         </div>
+    </div>
 
-        <script>
-            (function(){
-                const link = document.getElementById('githubLink');
-                const modal = document.getElementById('externalConfirm');
-                const yes = document.getElementById('extYes');
-                const no = document.getElementById('extNo');
+    <script>
+        (function(){
+            // Intercept external links (data-external or different host) and show confirmation modal
+            const modal = document.getElementById('externalModal');
+            const externalText = document.getElementById('externalText');
+            let pendingHref = null;
 
-                if(!link || !modal || !yes || !no) return;
+            function isExternal(link){
+                try{
+                    const url = new URL(link, location.href);
+                    return url.origin !== location.origin;
+                } catch(e){ return false; }
+            }
 
-                link.addEventListener('click', function(e){
+            document.addEventListener('click', function(e){
+                const a = e.target.closest('a');
+                if(!a) return;
+                if(a.dataset.external || isExternal(a.href)){
                     e.preventDefault();
-                    modal.dataset.href = this.href;
-                    modal.setAttribute('aria-hidden', 'false');
-                    modal.classList.add('open');
-                });
+                    pendingHref = a.href;
+                    externalText.textContent = `You're about to open: ${a.href}\n\nDo you want to continue?`;
+                    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+                }
+            });
 
-                yes.addEventListener('click', function(){
-                    const href = modal.dataset.href;
-                    modal.classList.remove('open');
-                    modal.setAttribute('aria-hidden','true');
-                    // open in a new tab safely
-                    window.open(href, '_blank', 'noopener');
-                });
+            document.getElementById('externalCancel').addEventListener('click', ()=>{ pendingHref=null; modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); });
+            document.getElementById('externalOpen').addEventListener('click', ()=>{ if(pendingHref) window.open(pendingHref, '_blank', 'noopener'); pendingHref=null; modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); });
 
-                no.addEventListener('click', function(){
-                    modal.classList.remove('open');
-                    modal.setAttribute('aria-hidden','true');
-                });
+            document.addEventListener('keydown', e => { if(e.key === 'Escape' && modal.classList.contains('open')){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); pendingHref=null; } });
 
-                // close modal on Escape
-                document.addEventListener('keydown', function(e){
-                    if(e.key === 'Escape' && modal.classList.contains('open')){
-                        modal.classList.remove('open');
-                        modal.setAttribute('aria-hidden','true');
-                    }
-                });
-            })();
-        </script>
+            // Small accessibility: enable keyboard focus + hover previews (via CSS). No extra JS needed.
+        })();
+    </script>
 </body>
 </html>
