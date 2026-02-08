@@ -1,42 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Calculator</title>
-    <link href="style.css" rel="stylesheet" type="text/css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Scientific Calculator — MiniFun</title>
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <style>
+    .calc-wrap{max-width:720px;margin:28px auto;padding:18px;border-radius:12px;background:linear-gradient(180deg,#f7fbff,#e8f3ff);box-shadow:0 6px 24px rgba(7,22,48,0.06)}
+    .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .display{height:74px;background:white;border-radius:8px;padding:10px 14px;font-size:26px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;box-shadow:inset 0 -2px 0 rgba(0,0,0,0.02)}
+    .display .small{font-size:12px;color:#3b5c8a;opacity:.85}
+    .controls{display:flex;gap:8px;align-items:center}
+    .pad{margin-top:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+    .btn{padding:12px;border-radius:8px;border:none;font-size:16px;cursor:pointer;background:#fff;box-shadow:0 4px 10px rgba(2,12,27,0.04)}
+    .btn.fn{background:#0d47a1;color:#fff}
+    .btn.op{background:#1565c0;color:#fff}
+    .btn.equal{grid-column:span 2;background:#0b3a91;color:#fff}
+    .btn.clear{background:#ef5350;color:#fff}
+    .small-note{font-size:12px;color:#234566}
+    @media(max-width:900px){.pad{grid-template-columns:repeat(6,1fr)}}
+    @media(max-width:520px){.calc-wrap{padding:12px}.display{font-size:20px;height:64px}}
+  </style>
 </head>
 <body>
-    <h1>Mini Calculator</h1>
-    <input type="number" id="num1" placeholder="First number">
-    <input type="number" id="num2" placeholder="Second number"><br>
-    <button onclick="add()">+</button>
-    <button onclick="subtract()">-</button>
-    <button onclick="multiply()">×</button>
-    <button onclick="divide()">÷</button>
-    <h2 id="result"></h2>
+  <main class="calc-wrap">
+    <div class="top-row">
+      <div style="flex:1">
+        <div class="display" id="display">
+          <div class="small" id="history">&nbsp;</div>
+          <div id="output">0</div>
+        </div>
+      </div>
+      <div class="controls">
+        <label class="small-note">Mode</label>
+        <select id="angleMode" title="Angle mode"><option value="deg">DEG</option><option value="rad">RAD</option></select>
+      </div>
+    </div>
 
-    <script>
-        function add() {
-            let n1 = parseFloat(document.getElementById('num1').value);
-            let n2 = parseFloat(document.getElementById('num2').value);
-            document.getElementById('result').innerText = n1 + n2;
+    <div class="pad" id="pad">
+      <!-- memory + basic -->
+      <button class="btn clear" data-action="mc">MC</button>
+      <button class="btn" data-action="mr">MR</button>
+      <button class="btn" data-action="mplus">M+</button>
+      <button class="btn" data-action="mminus">M-</button>
+      <button class="btn clear" data-action="clear">C</button>
+      <button class="btn" data-action="back">⌫</button>
+      <button class="btn" data-value="(">(</button>
+      <button class="btn" data-value=")">)</button>
+
+      <!-- scientific functions -->
+      <button class="btn fn" data-value="sin(">sin</button>
+      <button class="btn fn" data-value="cos(">cos</button>
+      <button class="btn fn" data-value="tan(">tan</button>
+      <button class="btn fn" data-value="asin(">asin</button>
+      <button class="btn fn" data-value="acos(">acos</button>
+      <button class="btn fn" data-value="atan(">atan</button>
+      <button class="btn fn" data-value="ln(">ln</button>
+      <button class="btn fn" data-value="log10(">log</button>
+
+      <button class="btn fn" data-value="sqrt(">√</button>
+      <button class="btn fn" data-value="pow(">xʸ</button>
+      <button class="btn" data-value="pi">π</button>
+      <button class="btn" data-value="e">e</button>
+      <button class="btn" data-value="%">%</button>
+      <button class="btn op" data-value="/">÷</button>
+      <button class="btn op" data-value="*">×</button>
+      <button class="btn op" data-value="^">^</button>
+
+      <!-- numbers -->
+      <button class="btn" data-value="7">7</button>
+      <button class="btn" data-value="8">8</button>
+      <button class="btn" data-value="9">9</button>
+      <button class="btn op" data-value="-">−</button>
+      <button class="btn" data-value="4">4</button>
+      <button class="btn" data-value="5">5</button>
+      <button class="btn" data-value="6">6</button>
+      <button class="btn op" data-value="+">+</button>
+
+      <button class="btn" data-value="1">1</button>
+      <button class="btn" data-value="2">2</button>
+      <button class="btn" data-value="3">3</button>
+      <button class="btn equal" data-action="equals">=</button>
+
+      <button class="btn" data-value="0">0</button>
+      <button class="btn" data-value=".">.</button>
+      <button class="btn" data-action="ans">ANS</button>
+      <button class="btn" data-value="," disabled style="opacity:.6">(comma)</button>
+    </div>
+    <div style="margin-top:12px;font-size:13px;color:#234566">Tip: Use keyboard for numbers and operators. Enter = evaluate. Esc = clear.</div>
+  </main>
+
+  <script>
+    (function(){
+      const out = document.getElementById('output');
+      const hist = document.getElementById('history');
+      const pad = document.getElementById('pad');
+      const angleMode = document.getElementById('angleMode');
+
+      let expr = '';
+      let memory = 0;
+      let lastAns = null;
+
+      // Define friendly functions in global scope so eval can use them
+      window.pi = Math.PI;
+      window.e = Math.E;
+      window.sin = x => angleMode.value==='deg' ? Math.sin(x*Math.PI/180) : Math.sin(x);
+      window.cos = x => angleMode.value==='deg' ? Math.cos(x*Math.PI/180) : Math.cos(x);
+      window.tan = x => angleMode.value==='deg' ? Math.tan(x*Math.PI/180) : Math.tan(x);
+      window.asin = x => (angleMode.value==='deg' ? Math.asin(x)*180/Math.PI : Math.asin(x));
+      window.acos = x => (angleMode.value==='deg' ? Math.acos(x)*180/Math.PI : Math.acos(x));
+      window.atan = x => (angleMode.value==='deg' ? Math.atan(x)*180/Math.PI : Math.atan(x));
+      window.ln = x => Math.log(x);
+      window.log10 = x => Math.log10 ? Math.log10(x) : Math.log(x)/Math.LN10;
+      window.sqrt = x => Math.sqrt(x);
+      window.pow = (a,b) => Math.pow(a,b);
+
+      function setOutput(v){ out.textContent = v; }
+      function update(){ setOutput(expr || '0'); }
+
+      function pushValue(v){ expr += v; update(); }
+      function clearAll(){ expr=''; hist.textContent=''; setOutput('0'); }
+      function back(){ expr = expr.slice(0,-1); update(); }
+
+      function evaluateExpression(){
+        if(!expr) return;
+        // sanitize allowed characters: digits, letters, operators, parentheses, dot, comma, spaces
+        const allowed = /^[0-9a-zA-Z()+\-*/^%.,\s]*$/;
+        if(!allowed.test(expr)) { setOutput('Error'); return; }
+
+        // replace ^ with ** for exponent (but we'll use pow fallback too)
+        let e = expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
+        // Map percent trailing number like 50% -> (50/100)
+        e = e.replace(/(\d+(?:\.\d+)?)%/g,'($1/100)');
+
+        try{
+          // use Function to evaluate in current scope where helper functions exist
+          const res = Function('return ('+e+')')();
+          hist.textContent = expr + ' =';
+          // round nicely
+          const outVal = (typeof res === 'number' && Number.isFinite(res)) ? +res.toFixed(12) : res;
+          lastAns = String(outVal);
+          expr = String(outVal);
+          setOutput(expr);
+        } catch(err){ setOutput('Error'); }
+      }
+
+      pad.addEventListener('click', function(e){
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        const val = btn.dataset.value;
+        const action = btn.dataset.action;
+        if(action === 'clear') clearAll();
+        else if(action === 'back') back();
+        else if(action === 'equals') evaluateExpression();
+        else if(action === 'mc'){ memory = 0; }
+        else if(action === 'mr'){ expr += String(memory); update(); }
+        else if(action === 'mplus'){ memory += Number(lastAns || 0); }
+        else if(action === 'mminus'){ memory -= Number(lastAns || 0); }
+        else if(action === 'ans'){ expr += (lastAns || '0'); update(); }
+        else if(val) pushValue(val);
+      });
+
+      // keyboard support (basic)
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){ evaluateExpression(); e.preventDefault(); }
+        else if(e.key === 'Backspace'){ back(); }
+        else if(e.key === 'Escape'){ clearAll(); }
+        else {
+          const allowed = '0123456789+-*/().^%,';
+          if(allowed.includes(e.key)) { pushValue(e.key); e.preventDefault(); }
+          // quick function shortcuts
+          else if(e.key === 'p') { pushValue('pi'); }
         }
-        function subtract() {
-            let n1 = parseFloat(document.getElementById('num1').value);
-            let n2 = parseFloat(document.getElementById('num2').value);
-            document.getElementById('result').innerText = n1 - n2;
-        }
-        function multiply() {
-            let n1 = parseFloat(document.getElementById('num1').value);
-            let n2 = parseFloat(document.getElementById('num2').value);
-            document.getElementById('result').innerText = n1 * n2;
-        }
-        function divide() {
-            let n1 = parseFloat(document.getElementById('num1').value);
-            let n2 = parseFloat(document.getElementById('num2').value);
-            document.getElementById('result').innerText = n1 / n2;
-        }
-    </script>
+      });
+
+      // initialize
+      clearAll();
+
+    })();
+  </script>
 </body>
 </html>
