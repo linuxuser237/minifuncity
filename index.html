@@ -7,13 +7,14 @@
     <style>
         :root{
             --clock-size: 6em;
-            --bg-transition: 1200ms;
+            --bg-transition: 15000ms;
             --accent: #ff4d4d;
             --soft: #ff9999;
+            --font-family: Arial;
         }
         html,body{height:100%;}
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: var(--font-family), sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -35,7 +36,6 @@
             border-radius: 18px;
             backdrop-filter: blur(6px) saturate(1.1);
             position: relative;
-            font-variant-numeric: tabular-nums;
         }
 
         /* RGB border */
@@ -44,10 +44,9 @@
             border: 4px solid rgba(255,255,255,0.03);
         }
 
-        /* neon */
-        .neon {
-            text-shadow: 0 0 8px rgba(255,255,255,0.2), 0 0 18px var(--accent), 0 0 36px rgba(255,0,150,0.15);
-            transform: translateZ(0) scale(1.02);
+        /* glow */
+        .glow {
+            text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
         }
 
         /* vaporwave overlay */
@@ -188,6 +187,13 @@
             opacity: 0.9;
             letter-spacing: 2px;
         }
+        .custom-message {
+            margin-top: 12px;
+            font-size: 1.2em;
+            opacity: 0.8;
+            max-width: 400px;
+            text-align: center;
+        }
         #motivationalQuote {
             margin-top: 18px;
             max-width: 420px;
@@ -278,16 +284,17 @@
             border-radius: 10px;
         }
 
-        /* extra styles */
-        .pomo-phase { font-size: 1.4em; margin-bottom: 8px; opacity: 0.85; }
-        .pomo-stats { margin-top: 16px; font-size: 1.1em; }
-        #help{position:absolute;right:12px;bottom:12px;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer}
-        .amoled{background:#000 !important}
-        .animated-gradient{animation:gradientShift 12s ease infinite}
-        @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-
-        /* custom color row */
-        .color-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+        .calcBtn {
+            padding: 12px;
+            font-size: 1.2em;
+            border-radius: 6px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .calcBtn:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body>
@@ -301,13 +308,14 @@
         <button data-mode="pomodoro" class="mode-btn">🍅 Pomodoro</button>
         <button data-mode="world" class="mode-btn">🌍 World</button>
         <button data-mode="alarm" class="mode-btn">⏰ Alarm</button>
+        <button data-mode="calculator" class="mode-btn">🧮 Calculator</button>
     </div>
 
     <!-- CLOCK MODE -->
     <div id="clockMode" class="mode-content active">
         <div id="clock" class="rgb-border">00:00:00</div>
         <div id="dateDisplay" class="date">FRIDAY, APRIL 17 2026</div>
-        <div id="motivationalQuote">"The best time to start was yesterday. The next best time is now."</div>
+        <div id="customMessageDisplay" class="custom-message"></div>
     </div>
 
     <!-- STOPWATCH MODE -->
@@ -331,17 +339,8 @@
         </svg>
         <div id="timerTime" style="position:absolute; font-size:4.5em; margin-top:-260px;">05:00</div>
         
-        <div class="controls-bar" style="margin-top:30px">
-            <button id="timerPreset5" class="btn">5 min</button>
-            <button id="timerPreset10" class="btn">10 min</button>
-            <button id="timerPreset15" class="btn">15 min</button>
-            <button id="timerPreset25" class="btn">25 min</button>
-            <button id="timerPreset60" class="btn">60 min</button>
-        </div>
-        
         <div style="display:flex; gap:12px; width:320px; margin-top:12px">
-            <input id="timerCustomMin" type="number" min="0" max="99" value="5" style="flex:1; padding:10px; border-radius:12px; background:rgba(255,255,255,0.15); color:white; border:none; text-align:center; font-size:1.3em">
-            <input id="timerCustomSec" type="number" min="0" max="59" value="0" style="flex:1; padding:10px; border-radius:12px; background:rgba(255,255,255,0.15); color:white; border:none; text-align:center; font-size:1.3em">
+            <input id="timerCustom" type="text" placeholder="MMSS e.g. 0430" value="0500" style="flex:1; padding:10px; border-radius:12px; background:rgba(255,255,255,0.15); color:white; border:none; text-align:center; font-size:1.3em">
             <button id="timerSetCustom" class="btn">SET</button>
         </div>
         
@@ -367,6 +366,12 @@
             <button id="pomoPresetMini15" class="btn">15/3 Mini</button>
             <button id="pomoPresetMini10" class="btn">10/2 Mini</button>
             <button id="pomoPresetLong" class="btn">50/10 Long</button>
+        </div>
+        
+        <div style="margin-top:12px;">
+            <label>Custom Work Minutes: <input type="number" id="customWorkMin" min="1" max="120" value="25" style="width:100px;padding:6px;border-radius:6px;background:rgba(255,255,255,0.15);color:white;border:none;text-align:center;"></label>
+            <button id="setCustomPomo" class="btn">Set Custom</button>
+            <div style="margin-top:6px; font-size:0.9em; opacity:0.8" id="customBreakDisplay">Break: 5 min</div>
         </div>
         
         <div class="controls-bar">
@@ -403,6 +408,20 @@
                 <button id="addAlarmBtn" class="btn primary" style="min-width:120px;">+ ADD ALARM</button>
             </div>
             <div class="small" style="margin-top:10px; text-align:center;">Alarms ring even if you switch modes</div>
+        </div>
+    </div>
+
+    <!-- CALCULATOR MODE -->
+    <div id="calculatorMode" class="mode-content">
+        <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:12px; width:320px;">
+            <input id="calcDisplay" readonly style="width:100%; padding:10px; font-size:2em; text-align:right; background:rgba(255,255,255,0.2); color:white; border:none; border-radius:6px; margin-bottom:10px;" value="">
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                <button class="calcBtn">7</button><button class="calcBtn">8</button><button class="calcBtn">9</button><button class="calcBtn">/</button>
+                <button class="calcBtn">4</button><button class="calcBtn">5</button><button class="calcBtn">6</button><button class="calcBtn">*</button>
+                <button class="calcBtn">1</button><button class="calcBtn">2</button><button class="calcBtn">3</button><button class="calcBtn">-</button>
+                <button class="calcBtn">0</button><button class="calcBtn">.</button><button class="calcBtn">=</button><button class="calcBtn">+</button>
+                <button id="calcClear" style="grid-column:span 2;" class="calcBtn">C</button><button class="calcBtn">(</button><button class="calcBtn">)</button>
+            </div>
         </div>
     </div>
 
@@ -450,22 +469,80 @@
                 <button id="applyCustomColors" class="btn" style="flex:1">Apply Custom Colors</button>
                 <button id="randomThemeBtn" class="btn" style="flex:1;background:#00cc88">🎲 Random Theme</button>
             </div>
+            <div class="row">
+                <label>Font: 
+                    <select id="fontSelect" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;padding:6px;">
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Comic Sans MS">Comic Sans</option>
+                        <option value="Trebuchet MS">Trebuchet</option>
+                        <option value="Lucida Console">Lucida Console</option>
+                        <option value="Monaco">Monaco</option>
+                        <option value="Consolas">Consolas</option>
+                        <option value="Fira Code">Fira Code</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Nunito">Nunito</option>
+                        <option value="Ubuntu">Ubuntu</option>
+                    </select>
+                </label>
+            </div>
+            <div class="row">
+                <label>Position: 
+                    <select id="positionSelect" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;padding:6px;">
+                        <option value="center">Center</option>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                        <option value="top-left">Top Left</option>
+                        <option value="top-right">Top Right</option>
+                        <option value="bottom-left">Bottom Left</option>
+                        <option value="bottom-right">Bottom Right</option>
+                    </select>
+                </label>
+            </div>
+            <div class="row">
+                <label>Date Format: 
+                    <select id="dateFormatSelect" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;padding:6px;">
+                        <option value="full">Friday, April 17 2026</option>
+                        <option value="short">Fri, Apr 17</option>
+                        <option value="numeric">04/17/2026</option>
+                        <option value="iso">2026-04-17</option>
+                    </select>
+                </label>
+            </div>
+            <div class="row">
+                <label>Custom Message: 
+                    <input type="text" id="customMessage" placeholder="Enter message below clock" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:6px;padding:6px;width:200px;">
+                </label>
+            </div>
         </div>
 
         <div id="extrasSection" class="section">
             <div class="row"><label><input type="checkbox" id="neonToggle"> Neon Mode</label></div>
+            <div class="row"><label><input type="checkbox" id="glowToggle"> Glow Effect</label></div>
             <div class="row"><label><input type="checkbox" id="vaporToggle"> Vaporwave Overlay</label></div>
             <div class="row"><label><input type="checkbox" id="glitchToggle"> Glitch Text Effect</label></div>
-            <div class="row"><label><input type="checkbox" id="amoledToggle"> AMOLED (pure black)</label></div>
             <div class="row"><label><input type="checkbox" id="rgbToggle" checked> RGB Border</label></div>
             <div class="row"><label><input type="checkbox" id="animGradToggle" checked> Animated Gradient</label></div>
             <div class="row"><label><input type="checkbox" id="particlesToggle" checked> Particles</label></div>
             <div class="row"><label><input type="checkbox" id="soundToggle" checked> Enable Beep Sounds</label></div>
+            <div class="row"><label>Beep Volume: <input type="range" id="beepVolume" min="0" max="1" step="0.1" value="0.5"></label></div>
+            <div class="row"><label><input type="checkbox" id="lowBatteryToggle"> Low Battery Mode (saves power)</label></div>
+            <div class="row"><label>Clock Opacity: <input type="range" id="clockOpacity" min="0.1" max="1" step="0.1" value="1"></label></div>
+            <div class="row"><label>Background Opacity: <input type="range" id="bgOpacity" min="0.1" max="1" step="0.1" value="1"></label></div>
             <div class="row"><button id="clearDataBtn" class="btn danger" style="width:100%">🗑️ Clear All Saved Data</button></div>
             <div class="row small">Pro tip: Space = play/pause • R = reset • T = random theme</div>
         </div>
 
-        <div id="help">MiniFun Clock v3 • 12 new features added!</div>
+        <div id="help">MiniFun Clock v3</div>
     </div>
 
     <script>
@@ -485,8 +562,8 @@
             currentTheme = s.currentTheme || 'red';
             
             // checkboxes
-            const ids = ['rainbowToggle','cycleToggle','pulseToggle','neonToggle','vaporToggle','glitchToggle',
-                         'amoledToggle','rgbToggle','animGradToggle','particlesToggle','soundToggle'];
+            const ids = ['rainbowToggle','cycleToggle','pulseToggle','neonToggle','glowToggle','vaporToggle','glitchToggle',
+                         'rgbToggle','animGradToggle','particlesToggle','soundToggle','lowBatteryToggle'];
             ids.forEach(id => {
                 if (s[id] !== undefined && document.getElementById(id)) {
                     document.getElementById(id).checked = s[id];
@@ -500,8 +577,76 @@
             particlesEnabled = !!s.particlesToggle;
             document.getElementById('particlesToggle').checked = particlesEnabled;
             
+            // beep volume
+            if (s.beepVolume) {
+                document.getElementById('beepVolume').value = s.beepVolume;
+            }
+            
+            // size
+            if (s.sizeRange) {
+                document.getElementById('sizeRange').value = s.sizeRange;
+                document.documentElement.style.setProperty('--clock-size', s.sizeRange + 'em');
+            }
+            
+            // wallpaper
+            if (s.wallUrl) {
+                document.getElementById('wallUrl').value = s.wallUrl;
+                document.body.style.background = `url("${s.wallUrl}") center/cover fixed, linear-gradient(135deg,var(--accent),var(--soft))`;
+            }
+            
+            // font
+            if (s.fontFamily) {
+                document.getElementById('fontSelect').value = s.fontFamily;
+                document.documentElement.style.setProperty('--font-family', s.fontFamily);
+            }
+            
+            // position
+            if (s.position) {
+                document.getElementById('positionSelect').value = s.position;
+                updatePosition(s.position);
+            }
+            
+            // date format
+            if (s.dateFormat) {
+                document.getElementById('dateFormatSelect').value = s.dateFormat;
+            }
+            
+            // custom message
+            if (s.customMessage) {
+                document.getElementById('customMessage').value = s.customMessage;
+                document.getElementById('customMessageDisplay').innerText = s.customMessage;
+            }
+            
+            // clock opacity
+            if (s.clockOpacity) {
+                document.getElementById('clockOpacity').value = s.clockOpacity;
+                clockEl.style.opacity = s.clockOpacity;
+            }
+            
+            // bg opacity
+            if (s.bgOpacity) {
+                document.getElementById('bgOpacity').value = s.bgOpacity;
+                document.body.style.opacity = s.bgOpacity;
+            }
+            
+            // low battery
+            if (s.lowBatteryToggle !== undefined) {
+                document.getElementById('lowBatteryToggle').checked = s.lowBatteryToggle;
+                if (s.lowBatteryToggle) {
+                    // apply low battery settings
+                    document.getElementById('particlesToggle').checked = false;
+                    particlesEnabled = false;
+                    document.getElementById('pulseToggle').checked = false;
+                    document.getElementById('rainbowToggle').checked = false;
+                    document.getElementById('cycleToggle').checked = false;
+                    document.getElementById('animGradToggle').checked = false;
+                    applyTheme(currentTheme);
+                }
+            }
+            
             applyTheme(currentTheme);
             clockEl.classList.toggle('neon', document.getElementById('neonToggle').checked);
+            clockEl.classList.toggle('glow', document.getElementById('glowToggle').checked);
             clockEl.classList.toggle('vapor', document.getElementById('vaporToggle').checked);
             clockEl.classList.toggle('glitch', document.getElementById('glitchToggle').checked);
         }
@@ -513,14 +658,24 @@
                 cycleToggle: document.getElementById('cycleToggle').checked,
                 pulseToggle: document.getElementById('pulseToggle').checked,
                 neonToggle: document.getElementById('neonToggle').checked,
+                glowToggle: document.getElementById('glowToggle').checked,
                 vaporToggle: document.getElementById('vaporToggle').checked,
                 glitchToggle: document.getElementById('glitchToggle').checked,
-                amoledToggle: document.getElementById('amoledToggle').checked,
                 rgbToggle: document.getElementById('rgbToggle').checked,
                 animGradToggle: document.getElementById('animGradToggle').checked,
                 particlesToggle: document.getElementById('particlesToggle').checked,
                 soundToggle: document.getElementById('soundToggle').checked,
-                is24Hour
+                beepVolume: document.getElementById('beepVolume').value,
+                is24Hour,
+                sizeRange: document.getElementById('sizeRange').value,
+                wallUrl: document.getElementById('wallUrl').value,
+                fontFamily: document.getElementById('fontSelect').value,
+                position: document.getElementById('positionSelect').value,
+                dateFormat: document.getElementById('dateFormatSelect').value,
+                customMessage: document.getElementById('customMessage').value,
+                lowBatteryToggle: document.getElementById('lowBatteryToggle').checked,
+                clockOpacity: document.getElementById('clockOpacity').value,
+                bgOpacity: document.getElementById('bgOpacity').value
             };
             localStorage.setItem(settingsKey, JSON.stringify(s));
         }
@@ -546,39 +701,33 @@
             if (!is24Hour) {
                 const ampm = h >= 12 ? 'PM' : 'AM';
                 h = h % 12 || 12;
-                display = `${String(h).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ${ampm}`;
+                display = `${String(h).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} ${ampm}`;
             } else {
                 display = `${String(h).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
             }
+            
             clockEl.innerText = display;
             
             // date
-            const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-            const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-            document.getElementById('dateDisplay').innerText = 
-                `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()} ${now.getFullYear()}`;
+            const format = document.getElementById('dateFormatSelect').value;
+            let dateStr = '';
+            if (format === 'full') {
+                const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+                const months = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+                dateStr = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()} ${now.getFullYear()}`;
+            } else if (format === 'short') {
+                const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                dateStr = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+            } else if (format === 'numeric') {
+                dateStr = `${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}/${now.getFullYear()}`;
+            } else if (format === 'iso') {
+                dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            }
+            document.getElementById('dateDisplay').innerText = dateStr;
         }
         setInterval(updateClock, 1000);
         updateClock();
-
-        // Motivational quotes (new feature #1)
-        const quotes = [
-            "The best time to start was yesterday. The next best time is now.",
-            "Small steps every day lead to massive results.",
-            "You are one decision away from a completely different life.",
-            "Time is the only resource you can never get back.",
-            "Focus on progress, not perfection.",
-            "Every second is a fresh start.",
-            "Dream big, work hard, stay focused.",
-            "The clock is ticking — make it count."
-        ];
-        let quoteIndex = 0;
-        function rotateQuote() {
-            if (currentMode !== 'clock') return;
-            quoteIndex = (quoteIndex + 1) % quotes.length;
-            document.getElementById('motivationalQuote').innerText = `"${quotes[quoteIndex]}"`;
-        }
-        setInterval(rotateQuote, 32000);
 
         // ====================== THEMES ======================
         const themes = {
@@ -598,7 +747,28 @@
             pastel_pink: ['#ffb3d9','#ffe0f0'],
             cyan: ['#00f7ff','#a3f8ff'],
             lime: ['#aaff00','#ddff99'],
-            violet: ['#8b00ff','#d8a3ff']
+            violet: ['#8b00ff','#d8a3ff'],
+            teal: ['#00bcd4','#80deea'],
+            brown: ['#795548','#bcaaa4'],
+            black: ['#000000','#000000'],
+            white: ['#ffffff','#f0f0f0'],
+            gray: ['#808080','#c0c0c0'],
+            navy: ['#000080','#4169e1'],
+            maroon: ['#800000','#dc143c'],
+            olive: ['#808000','#ffff00'],
+            aqua: ['#00ffff','#00ced1'],
+            fuchsia: ['#ff00ff','#da70d6'],
+            silver: ['#c0c0c0','#f5f5f5'],
+            gold: ['#ffd700','#ffed4e'],
+            coral: ['#ff7f50','#ffa07a'],
+            turquoise: ['#40e0d0','#48d1cc'],
+            salmon: ['#fa8072','#ffb6c1'],
+            khaki: ['#f0e68c','#fffacd'],
+            lavender: ['#e6e6fa','#d8bfd8'],
+            mint: ['#98fb98','#90ee90'],
+            peach: ['#ffdab9','#ffe4b5'],
+            sky: ['#87ceeb','#add8e6'],
+            rose: ['#ff69b4','#ffb6c1']
         };
         let currentTheme = 'red';
 
@@ -615,13 +785,7 @@
                 document.body.classList.remove('animated-gradient');
             }
 
-            if (document.getElementById('amoledToggle').checked) {
-                document.body.classList.add('amoled');
-                document.body.style.background = '#000';
-            } else {
-                document.body.classList.remove('amoled');
-                document.body.style.background = `linear-gradient(135deg, ${strong}, ${soft})`;
-            }
+            document.body.style.background = `linear-gradient(135deg, ${strong}, ${soft})`;
 
             clockEl.style.textShadow = `0 0 20px ${strong}`;
             if (document.getElementById('rgbToggle').checked) {
@@ -644,7 +808,6 @@
             themeGrid.appendChild(tile);
         });
 
-        // Custom HEX + color picker (new feature #2)
         const customAccent = document.getElementById('customAccent');
         const accentHex = document.getElementById('accentHex');
         const customSoft = document.getElementById('customSoft');
@@ -667,15 +830,12 @@
             const soft = softHex.value;
             document.documentElement.style.setProperty('--accent', accent);
             document.documentElement.style.setProperty('--soft', soft);
-            if (!document.getElementById('amoledToggle').checked) {
-                document.body.style.background = `linear-gradient(135deg, ${accent}, ${soft})`;
-            }
+            document.body.style.background = `linear-gradient(135deg, ${accent}, ${soft})`;
             clockEl.style.textShadow = `0 0 20px ${accent}`;
             currentTheme = 'custom';
             saveSettings();
         };
 
-        // Random theme button (new feature #3)
         document.getElementById('randomThemeBtn').onclick = () => {
             const keys = Object.keys(themes);
             const randomKey = keys[Math.floor(Math.random() * keys.length)];
@@ -688,20 +848,71 @@
             softHex.value = soft;
         };
 
+        document.getElementById('fontSelect').onchange = () => {
+            const font = document.getElementById('fontSelect').value;
+            document.documentElement.style.setProperty('--font-family', font);
+            saveSettings();
+        };
+
+        function updatePosition(pos) {
+            const body = document.body;
+            body.style.justifyContent = 'center';
+            body.style.alignItems = 'center';
+            if (pos === 'top') {
+                body.style.justifyContent = 'flex-start';
+                body.style.alignItems = 'center';
+            } else if (pos === 'bottom') {
+                body.style.justifyContent = 'flex-end';
+                body.style.alignItems = 'center';
+            } else if (pos === 'top-left') {
+                body.style.justifyContent = 'flex-start';
+                body.style.alignItems = 'flex-start';
+            } else if (pos === 'top-right') {
+                body.style.justifyContent = 'flex-start';
+                body.style.alignItems = 'flex-end';
+            } else if (pos === 'bottom-left') {
+                body.style.justifyContent = 'flex-end';
+                body.style.alignItems = 'flex-start';
+            } else if (pos === 'bottom-right') {
+                body.style.justifyContent = 'flex-end';
+                body.style.alignItems = 'flex-end';
+            }
+        }
+
+        document.getElementById('positionSelect').onchange = () => {
+            const pos = document.getElementById('positionSelect').value;
+            updatePosition(pos);
+            saveSettings();
+        };
+
+        document.getElementById('dateFormatSelect').onchange = () => {
+            updateClock();
+            saveSettings();
+        };
+
+        document.getElementById('customMessage').oninput = () => {
+            const msg = document.getElementById('customMessage').value;
+            document.getElementById('customMessageDisplay').innerText = msg;
+            saveSettings();
+        };
+
         // ====================== TOGGLES ======================
         document.getElementById('neonToggle').onchange = () => {
             clockEl.classList.toggle('neon', document.getElementById('neonToggle').checked);
+            saveSettings();
+        };
+        document.getElementById('glowToggle').onchange = () => {
+            clockEl.classList.toggle('glow', document.getElementById('glowToggle').checked);
             saveSettings();
         };
         document.getElementById('vaporToggle').onchange = () => {
             clockEl.classList.toggle('vapor', document.getElementById('vaporToggle').checked);
             saveSettings();
         };
-        document.getElementById('glitchToggle').onchange = () => { // new glitch toggle
+        document.getElementById('glitchToggle').onchange = () => {
             clockEl.classList.toggle('glitch', document.getElementById('glitchToggle').checked);
             saveSettings();
         };
-        document.getElementById('amoledToggle').onchange = () => { applyTheme(currentTheme); saveSettings(); };
         document.getElementById('rgbToggle').onchange = () => { applyTheme(currentTheme); saveSettings(); };
         document.getElementById('animGradToggle').onchange = () => { applyTheme(currentTheme); saveSettings(); };
         document.getElementById('particlesToggle').onchange = () => {
@@ -709,7 +920,34 @@
             if (!particlesEnabled) clearParticles();
             saveSettings();
         };
-        document.getElementById('soundToggle').onchange = () => saveSettings();
+        document.getElementById('beepVolume').oninput = () => { saveSettings(); };
+
+        document.getElementById('clockOpacity').oninput = (e) => {
+            clockEl.style.opacity = e.target.value;
+            saveSettings();
+        };
+        
+        document.getElementById('bgOpacity').oninput = (e) => {
+            document.body.style.opacity = e.target.value;
+            saveSettings();
+        };
+        
+        document.getElementById('lowBatteryToggle').onchange = () => {
+            const low = document.getElementById('lowBatteryToggle').checked;
+            if (low) {
+                // disable power-consuming features
+                document.getElementById('particlesToggle').checked = false;
+                particlesEnabled = false;
+                clearParticles();
+                document.getElementById('pulseToggle').checked = false;
+                stopPulse();
+                document.getElementById('rainbowToggle').checked = false;
+                document.getElementById('cycleToggle').checked = false;
+                document.getElementById('animGradToggle').checked = false;
+                applyTheme(currentTheme);
+            }
+            saveSettings();
+        };
 
         // Pulse
         let pulseInterval = null;
@@ -792,7 +1030,6 @@
             settingsPanel.style.display = (settingsPanel.style.display === 'none' || !settingsPanel.style.display) ? 'block' : 'none';
         };
 
-        // Fullscreen button (new feature #4)
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         fullscreenBtn.onclick = () => {
             if (!document.fullscreenElement) {
@@ -802,7 +1039,6 @@
             }
         };
 
-        // Clear data button (new feature #5)
         document.getElementById('clearDataBtn').onclick = () => {
             if (confirm('Delete ALL saved settings, alarms, pomodoro stats?')) {
                 localStorage.clear();
@@ -849,7 +1085,8 @@
             timer: document.getElementById('timerMode'),
             pomodoro: document.getElementById('pomodoroMode'),
             world: document.getElementById('worldMode'),
-            alarm: document.getElementById('alarmMode')
+            alarm: document.getElementById('alarmMode'),
+            calculator: document.getElementById('calculatorMode')
         };
         
         modeButtons.forEach(btn => {
@@ -980,23 +1217,25 @@
             updateTimerDisplay();
         }
         
-        function setTimerPreset(minutes) {
-            pauseTimer();
-            timerTotal = minutes * 60;
-            timerTimeLeft = timerTotal;
-            updateTimerDisplay();
-        }
-        document.getElementById('timerPreset5').onclick = () => setTimerPreset(5);
-        document.getElementById('timerPreset10').onclick = () => setTimerPreset(10);
-        document.getElementById('timerPreset15').onclick = () => setTimerPreset(15);
-        document.getElementById('timerPreset25').onclick = () => setTimerPreset(25);
-        document.getElementById('timerPreset60').onclick = () => setTimerPreset(60); // new preset
-        
         document.getElementById('timerSetCustom').onclick = () => {
-            const m = parseInt(document.getElementById('timerCustomMin').value) || 0;
-            const s = parseInt(document.getElementById('timerCustomSec').value) || 0;
+            const val = document.getElementById('timerCustom').value.trim();
+            let min = 5, sec = 0;
+            if (val.length === 4) {
+                min = parseInt(val.slice(0,2)) || 0;
+                sec = parseInt(val.slice(2,4)) || 0;
+            } else if (val.length === 3) {
+                min = parseInt(val[0]) || 0;
+                sec = parseInt(val.slice(1,3)) || 0;
+            } else if (val.length === 2) {
+                min = parseInt(val) || 0;
+                sec = 0;
+            } else if (val.length === 1) {
+                min = parseInt(val) || 0;
+                sec = 0;
+            }
+            if (sec > 59) sec = 59;
             pauseTimer();
-            timerTotal = m * 60 + s;
+            timerTotal = min * 60 + sec;
             timerTimeLeft = timerTotal;
             updateTimerDisplay();
         };
@@ -1104,26 +1343,36 @@
         document.getElementById('pomoPresetStandard').onclick = () => setPomoPreset(25, 5);
         document.getElementById('pomoPresetMini15').onclick = () => setPomoPreset(15, 3);
         document.getElementById('pomoPresetMini10').onclick = () => setPomoPreset(10, 2);
-        document.getElementById('pomoPresetLong').onclick = () => setPomoPreset(50, 10); // new long preset
+        document.getElementById('pomoPresetLong').onclick = () => setPomoPreset(50, 10);
         
         document.getElementById('pomoStart').onclick = startPomodoro;
         document.getElementById('pomoPause').onclick = pausePomodoro;
         document.getElementById('pomoSkip').onclick = skipPomodoro;
         document.getElementById('pomoReset').onclick = resetPomodoro;
         
-        const taskInput = document.getElementById('pomoTaskInput');
-        taskInput.addEventListener('input', () => {
-            document.getElementById('pomoTask').innerText = taskInput.value || 'What are you focusing on?';
-        });
+        document.getElementById('customWorkMin').oninput = () => {
+            const work = parseInt(document.getElementById('customWorkMin').value) || 25;
+            const breakMin = Math.round(work / 5);
+            document.getElementById('customBreakDisplay').innerText = `Break: ${breakMin} min`;
+        };
+        
+        document.getElementById('setCustomPomo').onclick = () => {
+            const work = parseInt(document.getElementById('customWorkMin').value) || 25;
+            const breakMin = Math.round(work / 5);
+            setPomoPreset(work, breakMin);
+        };
 
-        // ====================== WORLD CLOCK (new feature #6) ======================
         const worldCities = [
             {name: "Local", tz: null},
             {name: "New York", tz: "America/New_York"},
             {name: "London", tz: "Europe/London"},
             {name: "Tokyo", tz: "Asia/Tokyo"},
             {name: "Sydney", tz: "Australia/Sydney"},
-            {name: "UTC", tz: "UTC"}
+            {name: "Paris", tz: "Europe/Paris"},
+            {name: "Moscow", tz: "Europe/Moscow"},
+            {name: "Beijing", tz: "Asia/Shanghai"},
+            {name: "Dubai", tz: "Asia/Dubai"},
+            {name: "Los Angeles", tz: "America/Los_Angeles"}
         ];
         
         function createWorldCard(city) {
@@ -1183,7 +1432,6 @@
             setInterval(updateWorldClocks, 1000);
         }
 
-        // ====================== ALARM SYSTEM (new feature #7) ======================
         let alarms = JSON.parse(localStorage.getItem('minifunAlarms') || '[]');
         
         function saveAlarms() {
@@ -1265,7 +1513,27 @@
             document.body.appendChild(overlay);
         }
         
-        document.getElementById('addAlarmBtn').onclick = addAlarm;
+        // ====================== CALCULATOR ======================
+        let calcExpression = '';
+        document.querySelectorAll('.calcBtn').forEach(btn => {
+            btn.onclick = () => {
+                const val = btn.innerText;
+                if (val === '=') {
+                    try {
+                        calcExpression = eval(calcExpression).toString();
+                    } catch {
+                        calcExpression = 'Error';
+                    }
+                } else {
+                    calcExpression += val;
+                }
+                document.getElementById('calcDisplay').value = calcExpression;
+            };
+        });
+        document.getElementById('calcClear').onclick = () => {
+            calcExpression = '';
+            document.getElementById('calcDisplay').value = '';
+        };
 
         // ====================== BEEP SOUND ======================
         function playBeep() {
@@ -1276,7 +1544,8 @@
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             oscillator.frequency.setValueAtTime(680, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            const volume = parseFloat(document.getElementById('beepVolume').value);
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
             oscillator.start();
             setTimeout(() => { oscillator.stop(); }, 180);
         }
@@ -1317,20 +1586,16 @@
             applyTheme(currentTheme);
             startPulse();
             
-            // new world clocks
             initWorldClocks();
             
-            // new alarm system
             renderAlarms();
-            setInterval(checkAlarms, 30000); // check every 30 seconds
+            setInterval(checkAlarms, 1000); // check every second
             
             loop();
             
             updatePomoDisplay();
             updateTimerDisplay();
-            
-            console.log('%c🚀 MiniFun Clock v3 LOADED with 12+ new features!', 'color:#ff4d4d;font-size:18px;font-weight:bold');
-            console.log('✅ 12/24 hour toggle • ✅ Pastel toggle removed (tiles remain) • ✅ HEX color picker • ✅ World clocks • ✅ Full alarm system • ✅ Motivational quotes • ✅ Glitch effect • ✅ Random theme button • ✅ Fullscreen • ✅ Clear data • ✅ Extra presets everywhere • ✅ Keyboard T for random theme');
+            updateClock();
         }
         
         window.onload = init;
